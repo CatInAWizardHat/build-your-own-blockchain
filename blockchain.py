@@ -49,6 +49,10 @@ class Blockchain(object):
         :param amount: <int> Amount
         :return: <int> The index of the Block that will hold this transaction
         """
+        sender_balance = self.get_balance(sender)
+
+        if sender_balance < amount:
+            return -1
 
         self.current_transactions.append(
             {
@@ -172,6 +176,29 @@ class Blockchain(object):
             return True
 
         return False
+
+    def get_balance(self, address):
+        """
+        Helper function for new_transaction to validate the address
+        and ensure it has enough funds.
+        :param address: <str> address of the node to validate
+        :return: <int> The amount of funds in the address chain
+        """
+
+        amount = 0
+
+        for block in self.chain:
+            for transaction in block["transactions"]:
+                if transaction["sender"] == address:
+                    amount -= transaction.amount
+                if transaction["recipient"] == address:
+                    amount += transaction.amount
+
+        for transaction in self.current_transactions:
+            if transaction["sender"] == address:
+                amount -= transaction.amount
+
+        return amount
 
 
 # Instantiate our Node
